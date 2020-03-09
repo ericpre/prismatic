@@ -119,11 +119,7 @@ class cmake_build_ext(build_ext):
                     '-DCMAKE_RUNTIME_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir),
                 ]
                 # Assuming that Visual Studio and MinGW are supported compilers
-                if self.compiler.compiler_type == 'msvc':
-                    cmake_args += [
-                        '-DCMAKE_GENERATOR_PLATFORM=%s' % plat,
-                    ]
-                else:
+                if self.compiler.compiler_type != 'msvc':
                     cmake_args += [
                         '-G', 'MinGW Makefiles',
                     ]

@@ -73,8 +73,8 @@ find_package (Boost REQUIRED)
 find_package (FFTW3 REQUIRED)
 
 if(PRISMATIC_ENABLE_PYPRISMATIC)
-    find_package (PythonInterp 3.5 REQUIRED)
-    find_package (PythonLibs 3.5 REQUIRED)
+    find_package (PythonInterp REQUIRED)
+    find_package (PythonLibs REQUIRED)
 endif(PRISMATIC_ENABLE_PYPRISMATIC)
 
 if (PRISMATIC_USE_HDF5_STATIC)
