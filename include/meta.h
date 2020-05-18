@@ -46,8 +46,8 @@ namespace Prismatic{
             tileX                 = 1;
             tileY                 = 1;
             tileZ                 = 1;
-            E0                    = 80e3;
-            alphaBeamMax          = 24 / 1000.0;
+            E0                    = 80;
+            alphaBeamMax          = 24;
             numGPUs               = 4;
             numStreamsPerGPU      = 3;
             numThreads            = 12;
@@ -61,8 +61,8 @@ namespace Prismatic{
             probeDefocus          = 0.0;
             C3                    = 0.0;
             C5                    = 0.0;
-            probeSemiangle        = 20.0 / 1000;
-            detectorAngleStep     = 1.0 / 1000;
+            probeSemiangle        = 20.0;
+            detectorAngleStep     = 1.0;
             probeXtilt            = 0;
             probeYtilt            = 0;
             scanWindowXMin        = 0.0;
@@ -75,7 +75,7 @@ namespace Prismatic{
             scanWindowYMax_r      = 0.0;
             srand(time(0));
             randomSeed            = rand() % 100000;
-            crop4Damax            = 100.0 /1000;
+            crop4Damax            = 100.0;
             algorithm             = Algorithm::PRISM;
             includeThermalEffects = true;
             includeOccupancy      = true;
