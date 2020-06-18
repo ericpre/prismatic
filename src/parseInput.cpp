@@ -87,6 +87,7 @@ void printHelp()
               << "* --num-FP (-F) value : number of frozen phonon configurations to calculate (default: " << defaults.numFP << ")\n"
               << "* --thermal-effects (-te) bool : whether or not to include Debye-Waller factors (thermal effects) (default: True)\n"
               << "* --occupancy (-oc) bool : whether or not to consider occupancy values for likelihood of atoms existing at each site (default: True)\n"
+              << "* --3Dpotential (-3DP) bool : whether or not to use 3D parameterization with subpixel shifting for calculating the atomic potentials (default: True)\n"
               << "* --save-2D-output (-2D) ang_min ang_max : save the 2D STEM image integrated between ang_min and ang_max (in mrads) (default: Off)\n"
               << "* --save-3D-output (-3D) bool=true : Also save the 3D output at the detector for each probe (3D output mode) (default: On)\n"
               << "* --save-4D-output (-4D) bool=false : Also save the 4D output at the detector for each probe (4D output mode) (default: Off)\n"
@@ -95,7 +96,12 @@ void printHelp()
               << "* --save-DPC-CoM (-DPC) bool=false : Also save the DPC Center of Mass calculation (default: Off)\n"
               << "* --save-real-space-coords (-rsc) bool=false : Also save the real space coordinates of the probe dimensions (default: Off)\n"
               << "* --save-potential-slices (-ps) bool=false : Also save the calculated potential slices (default: Off)\n"
-              << "* --nyquist-sampling (-nqs) bool=false : Set number of probe positions at Nyquist sampling limit (default: Off)]\n";
+              << "* --save-smatrix (-sm) bool=false : Also save the compact smatrix (warning: can be very large) (default: Off)\n"
+              << "* --nyquist-sampling (-nqs) bool=false : Set number of probe positions at Nyquist sampling limit (default: Off)]\n"
+              << "* --import-potential (-ips) bool=false : Use precalculated projected potential from import HDF5 file. Must specify -if and -idp (default: Off)]\n"
+              << "* --import-smatrix (-ism) bool=false : Use precalculated scattering matrix from import HDF5 file -if and -idp (default: Off)]\n"
+              << "* --import-file (-if) filename : File from where to import precalculated potential or smatrix(default: Off)]\n"
+              << "* --import-data-path (-idp) string : Datapath from where precalcualted values are retrieved within HDF5 import file (default: none, uses Prismatic save path)\n";
 }
 
 // string white-space trimming utility functions courtesy of https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
@@ -663,6 +669,8 @@ bool parse_F(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
         cout << "Invalid value \"" << (*argv)[1] << "\" provided for number of frozen phonon configurations (syntax is -F #)\n";
         return false;
     }
+    //set a flag for when dealing with import files
+    meta.userSpecifiedNumFP = true;
     argc -= 2;
     argv[0] += 2;
     return true;
@@ -812,7 +820,6 @@ bool parse_o(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
         return false;
     }
     meta.filenameOutput = std::string((*argv)[1]);
-    //cout <<"meta.filenameAtoms = " << meta.filenameAtoms << endl;
     argc -= 2;
     argv[0] += 2;
     return true;
@@ -828,7 +835,37 @@ bool parse_of(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
         return false;
     }
     meta.outputFolder = std::string((*argv)[1]);
-    //cout <<"meta.filenameAtoms = " << meta.filenameAtoms << endl;
+    argc -= 2;
+    argv[0] += 2;
+    return true;
+};
+
+bool parse_if(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
+              int &argc, const char ***argv)
+{
+
+    if (argc < 2)
+    {
+        cout << "No filename provided for -if (syntax is -if filename)\n";
+        return false;
+    }
+    meta.importFile = std::string((*argv)[1]);
+    argc -= 2;
+    argv[0] += 2;
+
+    return true;
+};
+
+bool parse_idp(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
+              int &argc, const char ***argv)
+{
+
+    if (argc < 2)
+    {
+        cout << "No datapath provided for -idp (syntax is -idp /path/)\n";
+        return false;
+    }
+    meta.importPath = std::string((*argv)[1]);
     argc -= 2;
     argv[0] += 2;
     return true;
@@ -1260,6 +1297,20 @@ bool parse_oc(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
     return true;
 };
 
+bool parse_3DP(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
+              int &argc, const char ***argv)
+{
+    if (argc < 2)
+    {
+        cout << "No value provided for -3DP (syntax is -3DP bool)\n";
+        return false;
+    }
+    meta.potential3D = std::string((*argv)[1]) == "0" ? false : true;
+    argc -= 2;
+    argv[0] += 2;
+    return true;
+};
+
 bool parse_2D(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
               int &argc, const char ***argv)
 {
@@ -1400,6 +1451,48 @@ bool parse_ps(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
     return true;
 };
 
+bool parse_sm(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
+              int &argc, const char ***argv)
+{
+    if (argc < 2)
+    {
+        cout << "No value provided for -sm (syntax is -sm bool)\n";
+        return false;
+    }
+    meta.saveSMatrix = std::string((*argv)[1]) == "0" ? false : true;
+    argc -= 2;
+    argv[0] += 2;
+    return true;
+};
+
+bool parse_ips(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
+              int &argc, const char ***argv)
+{
+    if (argc < 2)
+    {
+        cout << "No value provided for -ips (syntax is -ips bool)\n";
+        return false;
+    }
+    meta.importPotential = std::string((*argv)[1]) == "0" ? false : true;
+    argc -= 2;
+    argv[0] += 2;
+    return true;
+};
+
+bool parse_ism(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
+              int &argc, const char ***argv)
+{
+    if (argc < 2)
+    {
+        cout << "No value provided for -ism (syntax is -ism bool)\n";
+        return false;
+    }
+    meta.importSMatrix = std::string((*argv)[1]) == "0" ? false : true;
+    argc -= 2;
+    argv[0] += 2;
+    return true;
+};
+
 bool parseInputs(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
                  int &argc, const char ***argv)
 {
@@ -1464,6 +1557,7 @@ static std::map<std::string, parseFunction> parser{
     {"--num-FP", parse_F}, {"-F", parse_F},
     {"--thermal-effects", parse_te}, {"-te", parse_te},
     {"--occupancy", parse_oc}, {"-oc", parse_oc},
+    {"--3Dpotential", parse_3DP}, {"-3DP", parse_3DP},
     {"--save-2D-output", parse_2D}, {"-2D", parse_2D},
     {"--save-3D-output", parse_3D}, {"-3D", parse_3D},
     {"--save-4D-output", parse_4D}, {"-4D", parse_4D},

@@ -40,7 +40,8 @@ namespace Prismatic{
             numFP                 = 1;
             fpNum                 = 1;
             sliceThickness        = 2.0;
-            numSlices             = 0;
+            zSampling             = 4;
+            numSlices             = 0; 
             zStart                = 0.0;
             cellDim               = std::vector<T>{20.0, 20.0, 20.0}; // this is z,y,x format
             tileX                 = 1;
@@ -77,6 +78,7 @@ namespace Prismatic{
             randomSeed            = rand() % 100000;
             crop4Damax            = 100.0 / 1000;
             algorithm             = Algorithm::PRISM;
+            potential3D           = true;
             includeThermalEffects = true;
             includeOccupancy      = true;
             alsoDoCPUWork         = true;
@@ -87,6 +89,7 @@ namespace Prismatic{
             saveDPC_CoM           = false;
             saveRealSpaceCoords   = false;
             savePotentialSlices   = false;
+            saveSMatrix           = false;
             userSpecifiedCelldims = false;
             realSpaceWindow_x     = false;
             realSpaceWindow_y     = false;
@@ -94,17 +97,26 @@ namespace Prismatic{
             integrationAngleMax   = detectorAngleStep;
             transferMode          = StreamingMode::Auto;
             nyquistSampling		  = false;
+            importPotential       = false;
+            importSMatrix         = false;
+            userSpecifiedNumFP    = false;
+            saveComplexOutputWave = false;
+            importFile            = "";
+            importPath            = "";
         }
         size_t interpolationFactorY; // PRISM f_y parameter
         size_t interpolationFactorX; // PRISM f_x parameter
         std::string filenameAtoms; // filename of txt file containing atoms (x,y,z,Z CSV format -- one atom per line)
         std::string filenameOutput;// filename of output image
         std::string outputFolder; // folder of output images
+        std::string importFile; //HDF5 file from where potential or S-matrix is imported
+        std::string importPath; //path to dataset in HDF5 file
         T realspacePixelSize[2]; // pixel size
         T potBound; // bounding integration radius for potential calculation
         size_t numFP; // number of frozen phonon configurations to compute
         size_t fpNum; // current frozen phonon number
         T sliceThickness; // thickness of slice in Z
+        size_t zSampling; //oversampling of potential in Z direction
         size_t numSlices; //number of slices to itereate through in multislice before giving an output
         T zStart; //Z coordinate of cell where multislice intermediate output will begin outputting
         T probeStepX;
@@ -139,6 +151,7 @@ namespace Prismatic{
         size_t numGPUs; // number of GPUs to use
         size_t numStreamsPerGPU; // number of CUDA streams to use per GPU
         Algorithm algorithm;
+        bool potential3D;
         bool includeThermalEffects;
         bool includeOccupancy;
         bool alsoDoCPUWork; // what fraction of computation to do on the cpu vs gpu
@@ -151,10 +164,15 @@ namespace Prismatic{
         bool saveDPC_CoM;
         bool saveRealSpaceCoords;
         bool savePotentialSlices;
+        bool saveSMatrix;
         bool userSpecifiedCelldims;
         bool realSpaceWindow_x;
         bool realSpaceWindow_y;
         bool nyquistSampling;
+        bool importPotential;
+        bool importSMatrix;
+        bool userSpecifiedNumFP;
+        bool saveComplexOutputWave;
         StreamingMode transferMode;
 
     };
