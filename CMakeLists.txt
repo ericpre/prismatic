@@ -21,6 +21,7 @@ set(PRISMATIC_ENABLE_DOUBLE_PRECISION 0 CACHE BOOL PRISMATIC_ENABLE_DOUBLE_PRECI
 set(PRISMATIC_ENABLE_PYPRISMATIC 0 CACHE BOOL PRISMATIC_ENABLE_PYPRISMATIC)
 set(PRISMATIC_USE_HDF5_STATIC 0 CACHE BOOL PRISMATIC_USE_HDF5_STATIC)
 set(OUTPUT_NAME prismatic CACHE STRING OUTPUT_NAME)
+set(PRISMATIC_TESTS 0 CACHE BOOL PRISMATIC_TESTS)
 
 #set (CMAKE_BUILD_TYPE DEBUG)
 if (PRISMATIC_ENABLE_GPU)
@@ -68,6 +69,13 @@ if (PRISMATIC_ENABLE_GPU)
             src/utility.cu)
 endif (PRISMATIC_ENABLE_GPU)
 
+if (PRISMATIC_TESTS)
+    set(TEST_SOURCE_FILES
+            unittests/testSuite.cpp
+            unittests/potentialTests.cpp
+            )
+endif (PRISMATIC_TESTS)
+
 # find core packages
 find_package (Threads REQUIRED)
 find_package (Boost REQUIRED)
@@ -112,6 +120,7 @@ find_library(HDF5_CXX_LIBRARIES hdf5_cpp)
 message("Boost dir " ${Boost_INCLUDE_DIRS})
 message("FFTW dir " ${FFTW_INCLUDE_DIRS})
 include_directories(${CMAKE_SOURCE_DIR}/include
+                    ${CMAKE_SOURCE_DIR}/unittests/include
                     ${Boost_INCLUDE_DIRS}
                     ${FFTW_INCLUDE_DIRS}
                     ${HDF5_INCLUDE_DIRS})
@@ -240,10 +249,6 @@ if (PRISMATIC_ENABLE_GUI)
     endif(APPLE)
 endif (PRISMATIC_ENABLE_GUI)
 
-
-
-
-
 if (PRISMATIC_ENABLE_CLI)
     install(TARGETS prismatic RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 endif(PRISMATIC_ENABLE_CLI)
@@ -295,3 +300,31 @@ if(PRISMATIC_ENABLE_PYPRISMATIC)
     # else Linux: dont link
 
 endif(PRISMATIC_ENABLE_PYPRISMATIC)
+
+if (PRISMATIC_TESTS)
+    find_package (Boost REQUIRED COMPONENTS unit_test_framework)
+
+    if (PRISMATIC_ENABLE_GPU)
+        cuda_add_executable(prismatic-tests
+                        ${SOURCE_FILES}
+                        ${CUDA_SOURCE_FILES}
+                        ${TEST_SOURCE_FILES})
+        cuda_add_cufft_to_target(prismatic-tests)
+    else(PRISMATIC_ENABLE_GPU)
+        add_executable(prismatic-tests
+                        ${SOURCE_FILES}
+                        ${TEST_SOURCE_FILES})
+    endif (PRISMATIC_ENABLE_GPU)
+
+    target_compile_definitions(prismatic-tests PRIVATE "BOOST_TEST_DYN_LINK=1")
+
+    target_link_libraries(prismatic-tests
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${FFTW_LIBRARIES}
+        ${HDF5_LIBRARIES}
+        ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+
+    add_custom_target(PrismaticTestSuite ALL ./prismatic-tests --log_level=all
+                        DEPENDS prismatic prismatic-tests)
+
+endif (PRISMATIC_TESTS)
