@@ -33,8 +33,8 @@ PRISMATIC_FLOAT_PRECISION get_potMin(const Array2D<PRISMATIC_FLOAT_PRECISION> &p
 	//xr and yr are generated symmetric about 0
 	//TODO: decide to bifurcate into legacy functionality?
 
-	const size_t xInd = std::floor(xr.size() / 2);
-	const size_t yInd = std::floor(yr.size() / 2);
+	const PRISMATIC_FLOAT_PRECISION xInd = std::floor(xr.size() / 2);
+	const PRISMATIC_FLOAT_PRECISION yInd = std::floor(yr.size() / 2);
 	// const PRISMATIC_FLOAT_PRECISION dx = round(sqrt(2 * (xInd + 1) - 1));
 	// const PRISMATIC_FLOAT_PRECISION dy = round(sqrt(2 * (yInd + 1) - 1));
 	// const PRISMATIC_FLOAT_PRECISION xv[] = {xInd - dx, xInd + dx, xInd - dx, xInd + dx, 0, 0, (PRISMATIC_FLOAT_PRECISION)xr.size() - 1, (PRISMATIC_FLOAT_PRECISION)xr.size() - 1};
@@ -56,9 +56,9 @@ PRISMATIC_FLOAT_PRECISION get_potMin3D(const Array3D<PRISMATIC_FLOAT_PRECISION>&
 {	
 	//xr, yr, and zr are generated symmetric about zero
 	//looks for minimum potential to prevent interaction with vacuum edge at boundaries of potential integration
-	const size_t xInd = std::floor(xr.size() / 2);
-	const size_t yInd = std::floor(yr.size() / 2);
-	const size_t zInd = std::floor(zr.size() / 2);
+	const PRISMATIC_FLOAT_PRECISION xInd = std::floor(xr.size() / 2);
+	const PRISMATIC_FLOAT_PRECISION yInd = std::floor(yr.size() / 2);
+	const PRISMATIC_FLOAT_PRECISION zInd = std::floor(zr.size() / 2);
 
 	const PRISMATIC_FLOAT_PRECISION xv[] = {(PRISMATIC_FLOAT_PRECISION)xr.size() - 2, xInd, xInd}; // -2 to guarantee zero on face
 	const PRISMATIC_FLOAT_PRECISION yv[] = {yInd, (PRISMATIC_FLOAT_PRECISION)yr.size() - 2, yInd};
