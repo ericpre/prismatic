@@ -286,7 +286,7 @@ void generateProjectedPotentials3D(Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
 								   const Array1D<long> &yvec,
 								   const Array1D<long> &zvec)
 {		
-	long numPlanes = round(pars.tiledCellDim[0]/pars.meta.sliceThickness);
+	unsigned long numPlanes = round(pars.tiledCellDim[0]/pars.meta.sliceThickness);
 	//check if intermediate output was specified, if so, create index of output slices
 	pars.numPlanes = numPlanes;
 	if (pars.meta.numSlices == 0) pars.numSlices = pars.numPlanes;
