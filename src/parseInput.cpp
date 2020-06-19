@@ -300,6 +300,14 @@ bool writeParamFile(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
     {
         f << "--occupancy:0\n";
     }
+    if (meta.potential3D)
+    {
+        f << "--3Dpotential:1\n";
+    }
+    else
+    {
+        f << "--3Dpotential:0\n";
+    }
     if (meta.nyquistSampling)
     {
         f << "--nyquist-sampling:1\n";

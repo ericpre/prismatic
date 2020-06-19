@@ -1302,7 +1302,7 @@ void writeMetadata(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> pars, float 
 	H5::Attribute numSlices_attr = sim_params.createAttribute("ns", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute te_attr = sim_params.createAttribute("te", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute oc_attr = sim_params.createAttribute("oc", H5::PredType::NATIVE_INT, scalar_attr);
-	H5::Attribute P3D_attr = sim_params.createAttribute("Potential3D", H5::PredType::NATIVE_INT, scalar_attr);
+	H5::Attribute P3D_attr = sim_params.createAttribute("potential3D", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute save3D_attr = sim_params.createAttribute("3D", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute save4D_attr = sim_params.createAttribute("4D", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute saveDPC_attr = sim_params.createAttribute("DPC", H5::PredType::NATIVE_INT, scalar_attr);
@@ -1381,7 +1381,7 @@ void writeMetadata(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> pars, float 
 	//logicals first need to be cast to ints
 	int tmp_te = {pars.meta.includeThermalEffects};
 	int tmp_oc = {pars.meta.includeOccupancy};
-	int tmp_P3D = {pars.meta.Potential3D};
+	int tmp_P3D = {pars.meta.potential3D};
 	int tmp_3D = {pars.meta.save3DOutput};
 	int tmp_4D = {pars.meta.save4DOutput};
 	int tmp_DPC = {pars.meta.saveDPC_CoM};
@@ -1529,7 +1529,7 @@ void writeMetadata(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> pars, double
 	H5::Attribute numSlices_attr = sim_params.createAttribute("ns", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute te_attr = sim_params.createAttribute("te", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute oc_attr = sim_params.createAttribute("oc", H5::PredType::NATIVE_INT, scalar_attr);
-	H5::Attribute P3D_attr = sim_params.createAttribute("Potential3D", H5::PredType::NATIVE_INT, scalar_attr);
+	H5::Attribute P3D_attr = sim_params.createAttribute("potential3D", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute save3D_attr = sim_params.createAttribute("3D", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute save4D_attr = sim_params.createAttribute("4D", H5::PredType::NATIVE_INT, scalar_attr);
 	H5::Attribute saveDPC_attr = sim_params.createAttribute("DPC", H5::PredType::NATIVE_INT, scalar_attr);
@@ -1608,7 +1608,7 @@ void writeMetadata(Prismatic::Parameters<PRISMATIC_FLOAT_PRECISION> pars, double
 	//logicals first need to be cast to ints
 	int tmp_te = {pars.meta.includeThermalEffects};
 	int tmp_oc = {pars.meta.includeOccupancy};
-	int tmp_P3D = {pars.meta.Potential3D};
+	int tmp_P3D = {pars.meta.potential3D};
 	int tmp_3D = {pars.meta.save3DOutput};
 	int tmp_4D = {pars.meta.save4DOutput};
 	int tmp_DPC = {pars.meta.saveDPC_CoM};

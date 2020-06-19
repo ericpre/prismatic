@@ -175,7 +175,7 @@ void generateProjectedPotentials(Parameters<PRISMATIC_FLOAT_PRECISION> &pars,
 				{
 
 					// create a random number generator to simulate thermal effects
-					std::cout << "random seed = " << pars.meta.randomSeed + currentSlice * pars.numPlanes << std::endl;
+					// std::cout << "random seed = " << pars.meta.randomSeed + currentSlice * pars.numPlanes << std::endl;
 					srand(pars.meta.randomSeed + currentSlice * pars.numPlanes);
 					std::default_random_engine de(pars.meta.randomSeed + currentSlice * pars.numPlanes);
 					normal_distribution<PRISMATIC_FLOAT_PRECISION> randn(0, 1);

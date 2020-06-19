@@ -224,6 +224,11 @@ namespace Prismatic{
         } else {
             std::cout << "includeOccupancy = false" << std::endl;
         }
+        if (potential3D) {
+            std::cout << "potential3D = true" << std::endl;
+        } else {
+            std::cout << "potential3D = false" << std::endl;
+        }
         if (includeThermalEffects) {
             std::cout << "includeThermalEffects = true" << std::endl;
         } else {
