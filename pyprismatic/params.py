@@ -65,6 +65,7 @@ class Metadata:
     "algorithm" : simulation algorithm to use, "prism" or "multislice"
     "includeThermalEffects" : true/false to apply random thermal displacements (Debye-Waller effect)
     "includeOccupancy" : true/false to consider occupancy values for likelihood of atoms existing at each site
+    "potential3D" : true/false to use 3D parameterization with subpixel shifting for calculating the atomic potentials (default: True)
     "alsoDoCPUWork" : true/false
     "save2DOutput" : save the 2D STEM image integrated between integrationAngleMin and integrationAngleMax
     "save3DOutput" : true/false Also save the 3D output at the detector for each probe (3D output mode)
@@ -120,6 +121,7 @@ class Metadata:
         "algorithm",
         "includeThermalEffects",
         "includeOccupancy",
+        "potential3D",
         "alsoDoCPUWork",
         "save2DOutput",
         "save3DOutput",
@@ -248,6 +250,7 @@ class Metadata:
         self.randomSeed = np.random.randint(0, 999999)
         self.algorithm = "prism"
         self.includeThermalEffects = False
+        self.potential3D = True
         self.includeOccupancy = True
         self.alsoDoCPUWork = True
         self.save2DOutput = False

@@ -30,7 +30,7 @@ static PyObject *pyprismatic_core_go(PyObject *self, PyObject *args)
 	int randomSeed;
 	int numFP, batchSizeTargetCPU, batchSizeTargetGPU,
 		tileX, tileY, tileZ,
-		numGPUs, numStreamsPerGPU, numThreads, includeThermalEffects, includeOccupancy, alsoDoCPUWork,
+		numGPUs, numStreamsPerGPU, numThreads, includeThermalEffects, includeOccupancy, potential3D, alsoDoCPUWork,
 		save2DOutput, save3DOutput, save4DOutput, saveDPC_CoM, savePotentialSlices, nyquistSampling, numSlices, crop4DOutput;
 	char *filenameAtoms, *filenameOutput, *algorithm, *transferMode;
 	double realspacePixelSizeX, realspacePixelSizeY, potBound,
@@ -47,7 +47,7 @@ static PyObject *pyprismatic_core_go(PyObject *self, PyObject *args)
 #endif //PRISMATIC_ENABLE_GPU
 
 	if (!PyArg_ParseTuple(
-			args, "iissdddiddddiiiddiiiiiddddddddddddddisppppppddsiiidiiddddd",
+			args, "iissdddiddddiiiddiiiiiddddddddddddddispppppppddsiiidiiddddd",
 			&interpolationFactorX,
 			&interpolationFactorY,
 			&filenameAtoms,
@@ -88,6 +88,7 @@ static PyObject *pyprismatic_core_go(PyObject *self, PyObject *args)
 			&algorithm,
 			&includeThermalEffects,
 			&includeOccupancy,
+			&potential3D,
 			&alsoDoCPUWork,
 			&save2DOutput,
 			&save3DOutput,
@@ -162,6 +163,7 @@ static PyObject *pyprismatic_core_go(PyObject *self, PyObject *args)
 	}
 	meta.includeThermalEffects = includeThermalEffects;
 	meta.includeOccupancy = includeOccupancy;
+	meta.potential3D = potential3D;
 	meta.alsoDoCPUWork = alsoDoCPUWork;
 	meta.save2DOutput = save2DOutput;
 	meta.save3DOutput = save3DOutput;
