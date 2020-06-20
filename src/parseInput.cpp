@@ -184,6 +184,8 @@ bool writeParamFile(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
     {
         f << "--algorithm:" << 'p' << '\n';
     }
+    f << "--interp-factor-x:" << meta.interpolationFactorX << '\n';
+    f << "--interp-factor-y:" << meta.interpolationFactorX << '\n';
     if (validateFilename(meta.filenameAtoms))
         f << "--input-file:" << meta.filenameAtoms << '\n';
     f << "--output-file:" << meta.filenameOutput << '\n';
