@@ -228,10 +228,22 @@ bool writeParamFile(Metadata<PRISMATIC_FLOAT_PRECISION> &meta,
     //between the two.
     f << "--probe-xtilt:" << meta.probeXtilt * 1000 << '\n';
     f << "--probe-ytilt:" << meta.probeYtilt * 1000 << '\n';
-    f << "--scan-window-x:" << meta.scanWindowXMin << ' ' << meta.scanWindowXMax << '\n';
-    f << "--scan-window-y:" << meta.scanWindowYMin << ' ' << meta.scanWindowYMax << '\n';
-    f << "--scan-window-xr:" << meta.scanWindowXMin_r << ' ' << meta.scanWindowXMax_r << '\n';
-    f << "--scan-window-yr:" << meta.scanWindowYMin_r << ' ' << meta.scanWindowYMax_r << '\n';
+    if (meta.realSpaceWindow_x)
+    {
+        f << "--scan-window-xr:" << meta.scanWindowXMin_r << ' ' << meta.scanWindowXMax_r << '\n';
+    }
+    else
+    {
+        f << "--scan-window-x:" << meta.scanWindowXMin << ' ' << meta.scanWindowXMax << '\n';
+    }
+    if (meta.realSpaceWindow_y)
+    {
+        f << "--scan-window-yr:" << meta.scanWindowYMin_r << ' ' << meta.scanWindowYMax_r << '\n';
+    }
+    else
+    {
+        f << "--scan-window-y:" << meta.scanWindowYMin << ' ' << meta.scanWindowYMax << '\n';
+    }
     f << "--random-seed:" << meta.randomSeed << '\n';
     f << "--4D-amax:" << meta.crop4Damax * 1000 << '\n';
     if (meta.includeThermalEffects)
