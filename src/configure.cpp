@@ -105,9 +105,9 @@ StreamingMode transferMethodAutoChooser(Prismatic::Metadata<T> &meta)
 	size_t estimatedBatchBufferSize = meta.numStreamsPerGPU * 3 * batch_size * imageSize[0] * imageSize[1] * sizeof(std::complex<PRISMATIC_FLOAT_PRECISION>);
 	estimatedMaxMemoryUsage = 3 * estimatedPotentialSize + estimatedBatchBufferSize; // factor of 3 is because there is a complex array of the same size created
 
-	cout << "Estimated potential array size = " << estimatedPotentialSize << '\n';
-	cout << "Estimated buffer memory needed = " << estimatedBatchBufferSize << '\n';
-	cout << "meta.numStreamsPerGPU*2*batch_size*imageSize[0]*imageSize[1]= " << meta.numStreamsPerGPU * 2 * batch_size * imageSize[0] * imageSize[1] << '\n';
+	cout << "Estimated potential array size = " << estimatedPotentialSize * 1e-9 << "GB\n";
+	cout << "Estimated buffer memory needed = " << estimatedBatchBufferSize * 1e-9 << "GB\n";
+	cout << "numStreamsPerGPU*2*batch_size*imageSize[0]*imageSize[1] = " << meta.numStreamsPerGPU * 2 * batch_size * imageSize[0] * imageSize[1]  * 1e-9 << "*1e9\n";
 
 	if (meta.algorithm == Prismatic::Algorithm::PRISM)
 	{
@@ -181,8 +181,8 @@ StreamingMode transferMethodAutoChooser(Prismatic::Metadata<T> &meta)
 
 	size_t available_memory;
 	cudaErrchk(cudaMemGetInfo(&available_memory, NULL));
-	cout << "Available GPU memory = " << available_memory << '\n';
-	cout << "Estimated GPU memory usage for single transfer method = " << estimatedMaxMemoryUsage << '\n';
+	cout << "Available GPU memory = " << available_memory * 1e-9 << "GB\n";
+	cout << "Estimated GPU memory usage for single transfer method = " << estimatedMaxMemoryUsage * 1e-9 << "GB\n";
 	return (estimatedMaxMemoryUsage > memoryThreshholdFraction * available_memory) ? Prismatic::StreamingMode::Stream : Prismatic::StreamingMode::SingleXfer;
 #else
 	return Prismatic::StreamingMode::SingleXfer;
