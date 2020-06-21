@@ -258,7 +258,7 @@ class Metadata:
         self.save4DOutput = False
         self.saveDPC_CoM = False
         self.crop4DOutput = False
-        self.crop4Damax = 0.1
+        self.crop4Damax = 100.0
         self.savePotentialSlices = False
         self.nyquistSampling = False
         self.integrationAngleMin = 0

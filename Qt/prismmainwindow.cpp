@@ -818,7 +818,7 @@ void PRISMMainWindow::setzStart_fromLineEdit(){
     PRISMATIC_FLOAT_PRECISION val = (PRISMATIC_FLOAT_PRECISION)this->ui->lineEdit_zStart->text().toDouble(&flag);
     if (flag){
         this->meta->zStart = val;
-        std::cout << "Setting intermediate output to begin after" << val << " Angstroms" << std::endl;
+        std::cout << "Setting intermediate output to begin after " << val << " Angstroms" << std::endl;
     }
     resetCalculation();
 }
@@ -837,18 +837,18 @@ void PRISMMainWindow::set2D_innerAngle_fromLineEdit(){
     bool flag = false;
     PRISMATIC_FLOAT_PRECISION val = (PRISMATIC_FLOAT_PRECISION)this->ui->lineEdit_2D_inner->text().toDouble(&flag);
     if (flag){
-        this->meta->integrationAngleMin = val /1000;
-        std::cout << "Setting annular detector inner angle to" << val << " mrad" << std::endl;
+        this->meta->integrationAngleMin = val / 1000;
+        std::cout << "Setting annular detector inner angle to " << val << " mrad" << std::endl;
     }
     resetCalculation();
 }
 
 void PRISMMainWindow::set2D_outerAngle_fromLineEdit(){
     bool flag = false;
-    PRISMATIC_FLOAT_PRECISION val = (PRISMATIC_FLOAT_PRECISION)this->ui->lineEdit_2D_inner->text().toDouble(&flag);
+    PRISMATIC_FLOAT_PRECISION val = (PRISMATIC_FLOAT_PRECISION)this->ui->lineEdit_2D_outer->text().toDouble(&flag);
     if (flag){
-        this->meta->integrationAngleMax = val /1000;
-        std::cout << "Setting annular detector outer angle to" << val << " mrad" << std::endl;
+        this->meta->integrationAngleMax = val / 1000;
+        std::cout << "Setting annular detector outer angle to " << val << " mrad" << std::endl;
     }
     resetCalculation();
 }
