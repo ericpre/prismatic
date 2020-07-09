@@ -22,6 +22,7 @@
 namespace Prismatic{
 
     enum class StreamingMode{Stream, SingleXfer, Auto};
+    enum class TiltSelection{Rectangular, Radial};
     template <class T>
     class Metadata{
     public:
@@ -66,6 +67,17 @@ namespace Prismatic{
             detectorAngleStep     = 1.0 / 1000;
             probeXtilt            = 0;
             probeYtilt            = 0;
+            minXtilt              = 0.0 / 1000; //mrads, for HRTEM only
+            minYtilt              = 0.0 / 1000;
+            maxXtilt              = 5.0 / 1000; //mrads, for HRTEM only
+            maxYtilt              = 5.0 / 1000;
+            minRtilt              = 0.0 / 1000; //radial option
+            maxRtilt              = 5.0 / 1000; 
+            tiltMode              = TiltSelection::Rectangular;
+            xTiltOffset           = 0.0 / 1000; //mrads, for HRTEM only
+            yTiltOffset           = 0.0 / 1000;
+            xTiltStep             = 1.0 / 1000; 
+            yTiltStep             = 1.0 / 1000; 
             scanWindowXMin        = 0.0;
             scanWindowXMax        = 0.99999;
             scanWindowYMin        = 0.0;
@@ -74,6 +86,8 @@ namespace Prismatic{
             scanWindowXMax_r      = 0.0;
             scanWindowYMin_r      = 0.0;
             scanWindowYMax_r      = 0.0;
+            probes_x              = {};
+            probes_y              = {};
             srand(time(0));
             randomSeed            = rand() % 100000;
             crop4Damax            = 100.0 / 1000;
@@ -89,6 +103,7 @@ namespace Prismatic{
             saveDPC_CoM           = false;
             saveRealSpaceCoords   = false;
             savePotentialSlices   = false;
+            saveSMatrix           = false;
             userSpecifiedCelldims = false;
             realSpaceWindow_x     = false;
             realSpaceWindow_y     = false;
@@ -96,12 +111,22 @@ namespace Prismatic{
             integrationAngleMax   = detectorAngleStep;
             transferMode          = StreamingMode::Auto;
             nyquistSampling		  = false;
+            importPotential       = false;
+            importSMatrix         = false;
+            userSpecifiedNumFP    = false;
+            saveComplexOutputWave = false;
+            enterCheck            = false;
+            arbitraryProbes       = false;
+            importFile            = "";
+            importPath            = "";
         }
         size_t interpolationFactorY; // PRISM f_y parameter
         size_t interpolationFactorX; // PRISM f_x parameter
         std::string filenameAtoms; // filename of txt file containing atoms (x,y,z,Z CSV format -- one atom per line)
         std::string filenameOutput;// filename of output image
         std::string outputFolder; // folder of output images
+        std::string importFile; //HDF5 file from where potential or S-matrix is imported
+        std::string importPath; //path to dataset in HDF5 file
         T realspacePixelSize[2]; // pixel size
         T potBound; // bounding integration radius for potential calculation
         size_t numFP; // number of frozen phonon configurations to compute
@@ -128,6 +153,17 @@ namespace Prismatic{
         T probeSemiangle;
         T probeXtilt;
         T probeYtilt;
+
+        T minXtilt;
+        T minYtilt;
+        T maxXtilt;
+        T maxYtilt;
+        T minRtilt;
+        T maxRtilt;
+        T xTiltOffset;
+        T yTiltOffset;
+        T xTiltStep;
+        T yTiltStep;
         T scanWindowXMin;
         T scanWindowXMax;
         T scanWindowYMin;
@@ -136,6 +172,8 @@ namespace Prismatic{
         T scanWindowXMax_r;
         T scanWindowYMin_r;
         T scanWindowYMax_r;
+        std::vector<T> probes_x;
+        std::vector<T> probes_y;
         T randomSeed;
         T crop4Damax;
         size_t numThreads; // number of CPU threads to use
@@ -155,11 +193,19 @@ namespace Prismatic{
         bool saveDPC_CoM;
         bool saveRealSpaceCoords;
         bool savePotentialSlices;
+        bool saveSMatrix;
         bool userSpecifiedCelldims;
         bool realSpaceWindow_x;
         bool realSpaceWindow_y;
         bool nyquistSampling;
+        bool importPotential;
+        bool importSMatrix;
+        bool userSpecifiedNumFP;
+        bool saveComplexOutputWave;
+        bool enterCheck;
+        bool arbitraryProbes; 
         StreamingMode transferMode;
+        TiltSelection tiltMode;
 
     };
 

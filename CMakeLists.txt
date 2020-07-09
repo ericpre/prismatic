@@ -44,11 +44,14 @@ set(SOURCE_FILES
         src/PRISM03_calcOutput.cpp
         src/PRISM_entry.cpp
         src/Multislice_entry.cpp
+        src/HRTEM_entry.cpp
         src/projectedPotential.cpp
         src/parseInput.cpp
         src/utility.cpp
         src/atom.cpp
-        src/go.cpp)
+        src/go.cpp
+        src/fileIO.cpp
+        src/probe.cpp)
 
 if (PRISMATIC_ENABLE_GUI)
 set(GUI_SOURCE_FILES
@@ -66,13 +69,18 @@ if (PRISMATIC_ENABLE_GPU)
             src/Multislice_calcOutput.cu
             src/PRISM02_calcSMatrix.cu
             src/PRISM03_calcOutput.cu
-            src/utility.cu)
+            src/utility.cu
+            src/fileIO.cu)
 endif (PRISMATIC_ENABLE_GPU)
 
 if (PRISMATIC_TESTS)
     set(TEST_SOURCE_FILES
             unittests/testSuite.cpp
             unittests/potentialTests.cpp
+            unittests/ioTests.cpp
+            unittests/hrtemTests.cpp
+            unittests/processingTests.cpp
+            unittests/probeTests.cpp
             )
 endif (PRISMATIC_TESTS)
 
@@ -324,7 +332,7 @@ if (PRISMATIC_TESTS)
         ${HDF5_LIBRARIES}
         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
-    add_custom_target(PrismaticTestSuite ALL ./prismatic-tests --log_level=all
+    add_custom_target(PrismaticTestSuite ALL ./prismatic-tests --log_level=all --run_test=*
                         DEPENDS prismatic prismatic-tests)
 
 endif (PRISMATIC_TESTS)
