@@ -22,7 +22,6 @@
 #include "atom.h"
 #include "meta.h"
 #include "H5Cpp.h"
-// #include "utility.h"
 
 #ifdef PRISMATIC_BUILDING_GUI
 class prism_progressbar;
@@ -41,9 +40,6 @@ namespace Prismatic{
 
 	// for monitoring memory consumption on GPU
 	static std::mutex memLock;
-
-	// for threadsafe HDF5 writing to 4D output
-	// static std::mutex HDF5_lock;
 	
     template <class T>
     class Parameters {
@@ -136,7 +132,9 @@ namespace Prismatic{
 		std::vector<T> depths;
 	    size_t numberBeams;
 		H5::H5File outputFile;
+		H5::H5File scratchFile;
 		size_t fpFlag; //flag to prevent creation of new HDF5 files
+		std::string currentTag;
 
 		#ifdef PRISMATIC_ENABLE_GPU
 				cudaDeviceProp deviceProperties;
@@ -179,6 +177,7 @@ namespace Prismatic{
 			catch (const std::domain_error &e) {
 				std::cout << "Prismatic: Error extracting atomic data from " << meta.filenameAtoms << "!" << std::endl;
 				std::cout << e.what();
+				std::cout << "Adjust simulation parameters or request larger file size with --max-filesize" << std::endl;
 				throw;
 			}
 
@@ -267,20 +266,59 @@ namespace Prismatic{
 					std::cout << "Resetting Y offset to 0.0 mrad" << std::endl;
 					yTiltOffset_tem = 0.0;
 				}
-
-				std::cout << "tilt settings" << std::endl;
-				std::cout << "min tilt step x: " << lambda / (imageSize[1] * pixelSize[1]) << std::endl;
-				std::cout << "min tilt step x: " << lambda / (tiledCellDim[2]) << std::endl;
-				std::cout << "min tilt step y: " << lambda / (imageSize[0] * pixelSize[0]) << std::endl;
-				std::cout << "min tilt step y: " << lambda / (tiledCellDim[1]) << std::endl;
-				std::cout << "minXtilt: " << minXtilt_tem << std::endl;
-				std::cout << "maxXtilt: " << maxXtilt_tem << std::endl;
-				std::cout << "xTiltOffset: " << xTiltOffset_tem << std::endl;
-				std::cout << "minYtilt: " << minYtilt_tem << std::endl;
-				std::cout << "maxYtilt: " << maxYtilt_tem << std::endl;
-				std::cout << "yTiltOffset: " << yTiltOffset_tem << std::endl;
 			}
 
+			auto digitString = [](int digit)
+			{
+				char buffer[20];
+				sprintf(buffer, "%04d", digit);
+				std::string output = buffer;
+				return output;
+			};
+
+			if(meta.probeDefocus_step > 0.0)
+			{
+				//set up defocus series with min max step
+				std::vector<PRISMATIC_FLOAT_PRECISION> defocii;
+				PRISMATIC_FLOAT_PRECISION currentVal = meta.probeDefocus_min;
+				int iter = 0;
+				while(currentVal < meta.probeDefocus_max)
+				{
+					defocii.push_back(currentVal);
+					meta.seriesTags.push_back("_df"+digitString(iter));
+					currentVal+=meta.probeDefocus_step;
+					iter++;
+				}
+				meta.seriesKeys.push_back("probeDefocus");
+				meta.seriesVals.push_back(defocii);	
+			}
+			else if(meta.probeDefocus_sigma > 0.0)
+			{
+				//set up defocus series with range from -2 to 2 sigma in steps of 0.5 sigma centered about C1
+				std::vector<PRISMATIC_FLOAT_PRECISION> defocii = {-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0};
+
+				for(auto i = 0; i < defocii.size(); i++)
+				{
+					defocii[i] = defocii[i]*meta.probeDefocus_sigma + meta.probeDefocus;
+					meta.seriesTags.push_back("_df"+digitString(i));
+				}
+				meta.seriesKeys.push_back("probeDefocus");
+				meta.seriesVals.push_back(defocii);
+			}
+
+			
+			//check filesize
+			try
+			{
+				calculateFileSize();
+			}
+			catch (const std::runtime_error &e)
+			{
+				std::cout << "Prismatic: Error with requested simulation settings." << std::endl;
+				std::cout << e.what()  << std::endl;
+				throw;
+			}
+			
 			#ifdef PRISMATIC_ENABLE_GPU
 			#ifndef NDEBUG
 					// for monitoring memory consumption on GPU
@@ -326,68 +364,68 @@ namespace Prismatic{
 		lambda = (T)(h / sqrt(2 * m * e * meta.E0) / sqrt(1 + e * meta.E0 / 2 / m / c / c) * 1e10);
 	}
 
-	// template <class T>
-	// void Parameters<T>::calculateFileSize(){
-
-	// 	//calc detector size
-	// 	long long ncx = (long long) floor((PRISMATIC_FLOAT_PRECISION) imageSize[1] / 2);
-	// 	PRISMATIC_FLOAT_PRECISION dpx = 1.0 / ((PRISMATIC_FLOAT_PRECISION)imageSize[1] * meta.realspacePixelSize[1]);
-	// 	long long ncy = (long long) floor((PRISMATIC_FLOAT_PRECISION) imageSize[0] / 2);
-	// 	PRISMATIC_FLOAT_PRECISION dpy = 1.0 / ((PRISMATIC_FLOAT_PRECISION)imageSize[0] * meta.realspacePixelSize[0]);
-	// 	PRISMATIC_FLOAT_PRECISION qmax_tmp = std::min(dpx*(ncx), dpy*(ncy)) / 2;
-
-	// 	PRISMATIC_FLOAT_PRECISION alphaMax_tmp = qmax_tmp*lambda;
-	// 	std::vector<PRISMATIC_FLOAT_PRECISION> detectorAngles_d = vecFromRange(meta.detectorAngleStep / 2, meta.detectorAngleStep, alphaMax_tmp - meta.detectorAngleStep / 2);
-	// 	size_t Ndet_tmp = detectorAngles_d.size();
-
-	// 	//calc num probes
-	// 	Array1D<PRISMATIC_FLOAT_PRECISION> xR = zeros_ND<1, PRISMATIC_FLOAT_PRECISION>({{2}});
-	// 	xR[0] = scanWindowXMin * tiledCellDim[2];
-	// 	xR[1] = scanWindowXMax * tiledCellDim[2];
-	// 	Array1D<PRISMATIC_FLOAT_PRECISION> yR = zeros_ND<1, PRISMATIC_FLOAT_PRECISION>({{2}});
-	// 	yR[0] = scanWindowYMin * tiledCellDim[1];
-	// 	yR[1] = scanWindowYMax * tiledCellDim[1];
-
-	// 	std::vector<PRISMATIC_FLOAT_PRECISION> xp_d = vecFromRange(xR[0], meta.probeStepX, xR[1]);
-	// 	std::vector<PRISMATIC_FLOAT_PRECISION> yp_d = vecFromRange(yR[0], meta.probeStepY, yR[1]);
-	// 	size_t numProbes = xp_d.size() + yp_d.size();
-
-	// 	long long uint numElems = 0;
-	// 	long long uint mult = (meta.saveComplexOutputWave) ? 2 : 1;
-	// 	if(meta.save2DOutput) numElems += numProbes*mult;
-	// 	if(meta.save3DOutput) numElems += numProbes*Ndet_tmp*mult;
-	// 	if(meta.saveDPC_CoM) numElems += 2*numProbes*(mult % 2); 
-	// 	if(meta.savePotentialSlices) numElems += imageSize[0]*imageSize[1]*std::ceil(tiledCellDim[0]/meta.sliceThickness);
-
-	// 	if(meta.algorithm == Algorithm::Multislice)
-	// 	{
-	// 		//TODO: num depth outputs
-	// 		if(meta.save4DOutput) numElems += numProbes*imageSize[0]*imageSize[1]*mult/4;
-	// 	}
-	// 	else if(meta.algorithm == Algorithm::PRISM)
-	// 	{
-	// 		size_t numBeams = imageSize[0]*imageSize[1]/(4*meta.interpolationFactorX*meta.interpolationFactorY);
-	// 		if(meta.save4DOutput) numElems += numProbes*imageSize[0]*imageSize[1]*mult/(4*meta.interpolationFactorX*meta.interpolationFactorY);
-	// 		if(meta.saveSMatrix) numElems += numBeams*imageSize[0]*imageSize[1]/4; 
-	// 	}
-	// 	else if(meta.algorithm == Algorithm::HRTEM)
-	// 	{
-	// 		//TODO: calculate number of tilts here
-	// 		numElems = 0;
-	// 		size_t numBeams = 1;
-	// 		if(meta.savePotentialSlices) numElems += imageSize[0]*imageSize[1]*std::ceil(tiledCellDim[0]/meta.sliceThickness);
-	// 		numElems += imageSize[0]*imageSize[1]*numBeams*mult/2; 
-	// 	}
-
-	// 	std::cout << "app. output file size is: " << numElems*sizeof(PRISMATIC_FLOAT_PRECISION) << std::endl;
-	// }
-
 	template <class T>
-	class Parameters_C : Parameters<T> {
-	
-	public:
-		Array4D<std::complex<T>> output;
-	};
+	void Parameters<T>::calculateFileSize(){
+
+		//calc detector size
+		long long ncx = (long long) floor((PRISMATIC_FLOAT_PRECISION) imageSize[1] / 2);
+		PRISMATIC_FLOAT_PRECISION dpx = 1.0 / ((PRISMATIC_FLOAT_PRECISION)imageSize[1] * meta.realspacePixelSize[1]);
+		long long ncy = (long long) floor((PRISMATIC_FLOAT_PRECISION) imageSize[0] / 2);
+		PRISMATIC_FLOAT_PRECISION dpy = 1.0 / ((PRISMATIC_FLOAT_PRECISION)imageSize[0] * meta.realspacePixelSize[0]);
+		PRISMATIC_FLOAT_PRECISION qmax_tmp = std::min(dpx*(ncx), dpy*(ncy)) / 2;
+
+		PRISMATIC_FLOAT_PRECISION alphaMax_tmp = qmax_tmp*lambda;
+		size_t Ndet_tmp = std::floor((alphaMax_tmp-meta.detectorAngleStep)/meta.detectorAngleStep);
+
+		//for beam calculations
+		PRISMATIC_FLOAT_PRECISION max_beam_angle = meta.alphaBeamMax / lambda;
+		PRISMATIC_FLOAT_PRECISION qx_extent = std::ceil(max_beam_angle/dpx);
+		PRISMATIC_FLOAT_PRECISION qy_extent = std::ceil(max_beam_angle/dpy);
+
+		//calc num probes
+		Array1D<PRISMATIC_FLOAT_PRECISION> xR = zeros_ND<1, PRISMATIC_FLOAT_PRECISION>({{2}});
+		xR[0] = scanWindowXMin * tiledCellDim[2];
+		xR[1] = scanWindowXMax * tiledCellDim[2];
+		Array1D<PRISMATIC_FLOAT_PRECISION> yR = zeros_ND<1, PRISMATIC_FLOAT_PRECISION>({{2}});
+		yR[0] = scanWindowYMin * tiledCellDim[1];
+		yR[1] = scanWindowYMax * tiledCellDim[1];
+
+		size_t numXP = std::floor((xR[1]-xR[0])/meta.probeStepX);
+		size_t numYP = std::floor((yR[1]-yR[0])/meta.probeStepY);
+		size_t numProbes = numXP*numYP;
+
+		unsigned long long int numElems = 0;
+		if(meta.save2DOutput) numElems += numProbes;
+		if(meta.save3DOutput) numElems += numProbes*Ndet_tmp;
+		if(meta.saveDPC_CoM) numElems += 2*numProbes; 
+
+		if(meta.algorithm == Algorithm::Multislice)
+		{
+			//TODO: num depth outputs
+			if(meta.save4DOutput) numElems += numProbes*imageSize[0]*imageSize[1]/4;
+		}
+		else if(meta.algorithm == Algorithm::PRISM)
+		{
+			size_t numBeams = std::ceil(qx_extent*qy_extent/(meta.interpolationFactorX*meta.interpolationFactorY));
+			std::cout << numBeams << std::endl;
+			if(meta.save4DOutput) numElems += numProbes*imageSize[0]*imageSize[1]/(4*meta.interpolationFactorX*meta.interpolationFactorY);
+			if(meta.saveSMatrix) numElems += numBeams*imageSize[0]*imageSize[1]/4; 
+		}
+		else if(meta.algorithm == Algorithm::HRTEM)
+		{
+			//TODO: calculate number of tilts here
+			numElems = 0;
+			size_t numBeams = 1;
+			numElems += imageSize[0]*imageSize[1]*numBeams*2/2; 
+		}
+
+		if(meta.savePotentialSlices) numElems += imageSize[0]*imageSize[1]*std::ceil(tiledCellDim[0]/meta.sliceThickness);
+		std::cout << "app. output file size is: " << numElems*sizeof(PRISMATIC_FLOAT_PRECISION) << std::endl;
+		if(numElems*sizeof(PRISMATIC_FLOAT_PRECISION) > meta.maxFileSize)
+		{
+			throw std::runtime_error("Simulation output file will be larger than maximum allowed file size.");
+		}
+	}
 
 }
 #endif //PRISM_PARAMS_H
