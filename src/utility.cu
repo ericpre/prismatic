@@ -519,7 +519,7 @@ __global__ void DPC_denominator_reduce(const float* psiIntensity_ds,
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
 	if (idx < N){
 		atomicAdd(&denominator[0], psiIntensity_ds[idx]);
-	}										   
+	}
 }
 
 __global__ void DPC_denominator_reduce(const double* psiIntensity_ds,
@@ -528,7 +528,7 @@ __global__ void DPC_denominator_reduce(const double* psiIntensity_ds,
 	int idx = threadIdx.x + blockDim.x * blockIdx.x;
 	if (idx < N){
 		atomicAdd_double(&denominator[0], psiIntensity_ds[idx]);
-	}			
+	}
 }
 
 size_t getNextPower2(const size_t& val){

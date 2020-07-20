@@ -185,7 +185,7 @@ __global__ void integrateDetector_imag(const cuFloatComplex* psi_ds,
                        cuFloatComplex* integratedOutput,
                        const size_t N,
                        const size_t num_integration_bins);
-                       
+
 __global__ void integrateDetector_real(const cuDoubleComplex* psi_ds,
                        const double* alphaInd_d,
                        cuDoubleComplex* integratedOutput,
@@ -218,7 +218,7 @@ __global__ void DPC_numerator_reduce(const float* psiIntensity_ds,
                                      const float* q_coord,
                                      float* numerator,
                                      const size_t N);
-   
+
 __global__ void DPC_numerator_reduce(const double* psiIntensity_ds,
                                      const double* q_coord,
                                      double* numerator,
@@ -228,7 +228,7 @@ __global__ void DPC_denominator_reduce(const float* psiIntensity_ds,
                                        float* denominator,
                                        const size_t N);
 
-__global__ void DPC_denominator_reduce(const float* psiIntensity_ds,
+__global__ void DPC_denominator_reduce(const double* psiIntensity_ds,
                                        double* denominator,
                                        const size_t N);
 
